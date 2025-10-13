@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kolesa Clone</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0d1117; color: #e6edf3; margin: 40px; }
+        h1 { color: #58a6ff; }
+        .listing { border: 1px solid #30363d; padding: 12px; margin-bottom: 10px; border-radius: 8px; }
+        .listing h3 { margin: 0; color: #3fb950; }
+        .listing p { margin: 5px 0; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <h1>Kolesa Clone — Объявления</h1>
+    {% for l in listings %}
+        <div class="listing">
+            <h3>{{ l.make }} {{ l.car_model }}</h3>
+            <p><b>Год:</b> {{ l.year }}</p>
+            <p><b>Город:</b> {{ l.city }}</p>
+            <p><b>Цена:</b> {{ l.price_kzt }} ₸</p>
+            <p><b>Пробег:</b> {{ l.mileage_km }} км</p>
+        </div>
+    {% empty %}
+        <p>Нет объявлений для отображения.</p>
+    {% endfor %}
+</body>
+</html>
