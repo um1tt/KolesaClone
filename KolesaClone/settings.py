@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     'locations',
     'catalog',
     'listings',
+    'rest_framework',
+    'django_filters',
+    'rest_framework_simplejwt',
+
 ]
 
 MIDDLEWARE = [
@@ -137,4 +141,10 @@ STATIC_URL = '/static/'
 UNFOLD = {
     "SITE_TITLE": "Kolesa Admin",
     "SITE_HEADER": "Kolesa Clone",
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }

@@ -4,7 +4,9 @@ from .models import Listing
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
-    list_display = ("id", "make", "car_model", "year", "city", "price_kzt", "status", "user")
+    list_display = ( "id", "make", "car_model", "year", "city", "price_kzt",
+        "engine_volume_l", "power_hp", "condition", "status", "user",
+        "created_at", "updated_at")
     list_filter = (
         "status", "city", "make", "car_model", "year",
         "body_type", "fuel_type", "transmission", "drive_type", "color"

@@ -9,60 +9,71 @@ from catalog.models import (
 )
 from listings.models import Listing, ListingStatus
 
+
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Seed demo data for Kolesa Clone"
+    help = "Seed demo data for KolesaClone (updated version)"
 
     def handle(self, *args, **options):
         random.seed(42)
 
-        # Users
         users = []
         for i in range(20):
-            u, _ = User.objects.get_or_create(
-                username=f'user{i}',
-                defaults={"email": f"user{i}@ex.com"}
+            email = f"user{i}@example.com"
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "password": "12345678",
+                    "phone": f"87000000{i:02d}"
+                }
             )
-            users.append(u)
-        self.stdout.write(self.style.SUCCESS(f"Users: {len(users)}"))
+            users.append(user)
 
-        # Regions/Cities
-        region_names = ["Атырауская", "Алматинская", "Мангистауская", "Западно-Казахстанская"]
-        regions = [Region.objects.get_or_create(name=n)[0] for n in region_names]
-        region_city_mapping = {
+        self.stdout.write(self.style.SUCCESS(f"Users created: {len(users)}"))
+
+        region_data = {
             "Атырауская": ["Атырау"],
             "Алматинская": ["Алматы"],
             "Мангистауская": ["Актау"],
             "Западно-Казахстанская": ["Уральск"],
         }
 
+        regions = []
         cities = []
-        for r in regions:
-            for city_name in region_city_mapping[r.name]:
-                city, _ = City.objects.get_or_create(region=r, name=city_name)
+
+        for region_name, city_list in region_data.items():
+            region, _ = Region.objects.get_or_create(name=region_name)
+            regions.append(region)
+            for city_name in city_list:
+                city, _ = City.objects.get_or_create(region=region, name=city_name)
                 cities.append(city)
 
+        self.stdout.write(self.style.SUCCESS(f"Regions: {len(regions)}, Cities: {len(cities)}"))
 
-        # Catalogs
-        makes = [Make.objects.get_or_create(name=n)[0] for n in ["Toyota", "BMW", "Mercedes-Benz", "Hyundai", "LADA"]]
-        car_models = []
-        mapping = {
+        makes_data = {
             "Toyota": ["Camry", "Corolla"],
             "BMW": ["5 Series", "3 Series"],
             "Mercedes-Benz": ["E-Class", "C-Class"],
             "Hyundai": ["Elantra", "Sonata"],
             "LADA": ["Vesta", "Granta"],
         }
-        for m in makes:
-            for mn in mapping[m.name]:
-                car_models.append(CarModel.objects.get_or_create(make=m, name=mn)[0])
 
+        makes = []
+        car_models = []
         generations = []
-        for cm in car_models:
-            for g in ["Gen1", "Gen2", "Gen3"]:
-                generations.append(Generation.objects.get_or_create(car_model=cm, name=g)[0])
+
+        for make_name, model_names in makes_data.items():
+            make = Make.objects.get_or_create(name=make_name)[0]
+            makes.append(make)
+            for model_name in model_names:
+                model = CarModel.objects.get_or_create(make=make, name=model_name)[0]
+                car_models.append(model)
+
+                for g in ["Gen1", "Gen2", "Gen3"]:
+                    gen = Generation.objects.get_or_create(car_model=model, name=g)[0]
+                    generations.append(gen)
 
         body_types = [BodyType.objects.get_or_create(name=n)[0] for n in ["Sedan", "Hatchback", "SUV"]]
         fuel_types = [FuelType.objects.get_or_create(name=n)[0] for n in ["Petrol", "Diesel", "Hybrid"]]
@@ -71,36 +82,50 @@ class Command(BaseCommand):
         colors = [Color.objects.get_or_create(name=n)[0] for n in ["White", "Black", "Silver", "Blue", "Red"]]
         features = [Feature.objects.get_or_create(name=n)[0] for n in ["AC", "Heated seats", "Rear camera", "Cruise control", "Bluetooth"]]
 
-        # Listings (>= 50)
+        self.stdout.write(self.style.SUCCESS("Catalog data created."))
+
         listings = []
+
         for i in range(50):
-            cm = random.choice(car_models)
-            l = Listing.objects.create(
+            model = random.choice(car_models)
+            gen = random.choice(generations)
+
+            listing = Listing.objects.create(
                 user=random.choice(users),
                 city=random.choice(cities),
-                make=cm.make,
-                car_model=cm,
-                generation=random.choice(generations),
-                year=random.randint(2005, 2023),
-                mileage_km=random.randint(10_000, 250_000),
+
+                make=model.make,
+                car_model=model,
+                generation=gen,
+
+                year=random.randint(2000, 2023),
+                mileage_km=random.randint(15_000, 350_000),
+
                 body_type=random.choice(body_types),
                 fuel_type=random.choice(fuel_types),
                 transmission=random.choice(transmissions),
                 drive_type=random.choice(drive_types),
                 color=random.choice(colors),
+
                 engine_volume_l=random.choice([1.6, 1.8, 2.0, 2.5, 3.0]),
                 power_hp=random.randint(90, 350),
+
                 steering_wheel=random.choice(["left", "right"]),
                 condition=random.choice(["new", "used"]),
-                vin=f"VIN{100000+i}",
-                description="Demo listing",
-                price_kzt=random.randint(2_000_000, 35_000_000),
-                status=random.choice([ListingStatus.DRAFT, ListingStatus.PUBLISHED]),
-                contact_name=f"Seller {i}",
-                contact_phone=f"+7 7{random.randint(10, 99)}-{random.randint(100, 999)}-{random.randint(10, 99)}-{random.randint(10, 99)}",
-            )
-            l.features.add(*random.sample(features, k=random.randint(1, len(features))))
-            listings.append(l)
 
-        self.stdout.write(self.style.SUCCESS(f"Listings: {len(listings)}"))
-        self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))
+                vin=f"VINCODE{i:05d}",
+                description="Demo listing data",
+
+                price_kzt=random.randint(2_000_000, 30_000_000),
+                status=random.choice([ListingStatus.DRAFT, ListingStatus.PUBLISHED]),
+
+                contact_name=f"Seller {i}",
+                contact_phone=f"8707{random.randint(1000000, 9999999)}",
+            )
+
+            listing.features.add(*random.sample(features, k=random.randint(1, len(features))))
+
+            listings.append(listing)
+
+        self.stdout.write(self.style.SUCCESS(f"Listings created: {len(listings)}"))
+        self.stdout.write(self.style.SUCCESS("Demo data SEEDING COMPLETED!"))
