@@ -1,6 +1,24 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Django
 db.sqlite3
-.env
-*.log
 media/
+staticfiles/
+
+# Environment
+.env
+venv/
+.env/
+
+# Pytest
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

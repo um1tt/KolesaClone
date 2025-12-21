@@ -6,7 +6,7 @@ from .models import Listing
 class ListingAdmin(admin.ModelAdmin):
     list_display = ( "id", "make", "car_model", "year", "city", "price_kzt",
         "engine_volume_l", "power_hp", "condition", "status", "user",
-        "created_at", "updated_at")
+        "created_at", "updated_at", "deleted_at")
     list_filter = (
         "status", "city", "make", "car_model", "year",
         "body_type", "fuel_type", "transmission", "drive_type", "color"
