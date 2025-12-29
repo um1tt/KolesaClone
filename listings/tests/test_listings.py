@@ -11,11 +11,19 @@ from catalog.models import (
 
 @pytest.fixture
 def api_client():
+    """
+    Фикстура APIClient (DRF) для отправки запросов в тестах.
+    """
     return APIClient()
 
 
 @pytest.fixture
 def user():
+    """
+    Фикстура: создаёт тестового пользователя.
+
+    Используется как основной пользователь для авторизованных запросов.
+    """
     return User.objects.create_user(
         email="user@gmail.com",
         password="12345678"
@@ -24,12 +32,23 @@ def user():
 
 @pytest.fixture
 def auth_client(api_client, user):
+    """
+    Фикстура: возвращает APIClient с выполненной авторизацией (force_authenticate).
+
+    Удобно, чтобы не авторизовываться в каждом тесте вручную.
+    """
     api_client.force_authenticate(user=user)
     return api_client
 
 
 @pytest.fixture
 def listing_data():
+    """
+    Фикстура: создаёт необходимые справочники (регион, город, каталог авто)
+    и возвращает валидный словарь данных для создания Listing через API.
+
+    Возвращаем именно dict с id, чтобы напрямую отправлять его в POST.
+    """
     region = Region.objects.create(name="Region")
     city = City.objects.create(name="City", region=region)
 
@@ -69,6 +88,12 @@ def listing_data():
 
 @pytest.mark.django_db
 def test_create_listing_success(auth_client, listing_data):
+    """
+    Проверка успешного создания объявления авторизованным пользователем.
+
+    Ожидаем:
+    - HTTP 201 CREATED
+    """
     response = auth_client.post(
         "/api/listings/create/",
         listing_data,
@@ -79,6 +104,12 @@ def test_create_listing_success(auth_client, listing_data):
 
 @pytest.mark.django_db
 def test_create_listing_missing_year(auth_client, listing_data):
+    """
+    Проверка ошибки валидации при создании объявления без обязательного поля year.
+
+    Ожидаем:
+    - HTTP 400 BAD REQUEST
+    """
     listing_data.pop("year")
 
     response = auth_client.post(
@@ -92,6 +123,12 @@ def test_create_listing_missing_year(auth_client, listing_data):
 
 @pytest.mark.django_db
 def test_update_listing_not_owner(auth_client, listing_data):
+    """
+    Проверка запрета обновления объявления, если пользователь не является владельцем.
+
+    Ожидаем:
+    - HTTP 403 FORBIDDEN
+    """
     other = User.objects.create_user(
         email="other@gmail.com",
         password="12345678"
