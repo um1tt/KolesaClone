@@ -9,6 +9,7 @@ from catalog.models import (
     Transmission, DriveType, Color
 )
 
+"это тест через APITest, вы сказали поменять, обновленные тесты через пайтест в фолдерах tests, а смысла удалять рабочий апитест не видел"
 
 class ListingTests(APITestCase):
     """
